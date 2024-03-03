@@ -21,4 +21,4 @@ class User(SqlAlchemyBase):
                                       default=datetime.datetime.now)
 
     def __repr__(self):
-        return f'{self.id}, {self.email}'
+        return f'<Colonist> {self.id} {self.surname} {self.name}'
