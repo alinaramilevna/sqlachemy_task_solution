@@ -7,6 +7,11 @@ caption {
   padding: 10px;
   color: #000000;
  }
+
+h6 {
+margin: 1.5rem;
+}
+
 th {
   padding: 10px;
   border: 1px solid #000000;
