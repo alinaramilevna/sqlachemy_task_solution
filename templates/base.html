@@ -15,6 +15,14 @@
 
 <header>
     <nav class="navbar navbar-light bg-light">
+        {% if current_user.is_authenticated %}
+        <a class="navbar-brand" href="/logout">{{ current_user.name }}</a>
+        {% else %}
+        <p>
+            <a class="btn btn-primary " href="/register">Зарегистрироваться</a>
+            <a class="btn btn-success" href="/login">Войти</a>
+        </p>
+        {% endif %}
         <h1 class="navbar-brand" href="#">Миссия колонизация Марса</h1>
     </nav>
 </header>
