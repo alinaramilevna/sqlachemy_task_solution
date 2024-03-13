@@ -25,7 +25,7 @@ def load_user(user_id):
 
 def main():
     db_session.global_init("db/users.db")
-    app.run()
+    app.run(debug=True)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -112,9 +112,9 @@ def edit_news(id):
     form = NewsForm()
     if request.method == "GET":
         db_sess = db_session.create_session()
-        news = db_sess.query(News).filter(News.id == id,
-                                          News.user == current_user
-                                          ).first()
+        news = db_sess.query(News).filter(
+            News.id == id,
+            News.user == current_user).first()
         if news:
             form.job.data = news.job
             form.work_size.data = news.work_size
@@ -145,12 +145,14 @@ def edit_news(id):
 @login_required
 def news_delete(id):
     db_sess = db_session.create_session()
-    news = db_sess.query(News).filter(News.id == id,
-                                      News.user == current_user
-                                      ).first()
+    news = db_sess.query(News).filter(News.id == id).first()
+
     if news:
-        db_sess.delete(news)
-        db_sess.commit()
+        if news.user.id == current_user.id or current_user.id == 1:
+            db_sess.delete(news)
+            db_sess.commit()
+        else:
+            abort(404)
     else:
         abort(404)
     return redirect('/')
