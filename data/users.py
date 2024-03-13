@@ -3,6 +3,7 @@ import sqlalchemy
 from .db_session import SqlAlchemyBase
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy import orm
 
 
 class User(SqlAlchemyBase, UserMixin):
@@ -20,6 +21,7 @@ class User(SqlAlchemyBase, UserMixin):
     hashed_password = sqlalchemy.Column(sqlalchemy.String)
     modified_date = sqlalchemy.Column(sqlalchemy.DateTime,
                                       default=datetime.datetime.now)
+    news = orm.relationship('News', back_populates='user')
 
     def __repr__(self):
         return f'<Colonist> {self.id} {self.surname} {self.name}'
