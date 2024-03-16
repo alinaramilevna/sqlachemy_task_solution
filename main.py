@@ -4,17 +4,30 @@ import json
 from flask import Flask, render_template, redirect, make_response, request, session, abort
 from data import db_session
 from data.departaments import Department
+from data.jobs_api import blueprint
 from data.users import User
-from data.news import News
+from data.jobs import Jobs
 from forms.login_form import LoginForm
 from forms.user import RegisterForm
 from forms.news import NewsForm
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
+from data import db_session, jobs_api, user_api
+from flask import jsonify, make_response
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 login_manager = LoginManager()
 login_manager.init_app(app)
+
+
+@app.errorhandler(404)
+def not_found(error):
+    return make_response(jsonify({'error': 'Not found'}), 404)
+
+
+@app.errorhandler(400)
+def bad_request(_):
+    return make_response(jsonify({'error': 'Bad Request'}), 400)
 
 
 @login_manager.user_loader
@@ -24,7 +37,9 @@ def load_user(user_id):
 
 
 def main():
-    db_session.global_init("db/users.db")
+    db_session.global_init("db/blogs.db")
+    app.register_blueprint(jobs_api.blueprint)
+    app.register_blueprint(user_api.blueprint)
     app.run(debug=True)
 
 
@@ -76,7 +91,7 @@ def login():
 @app.route('/index')
 def index():
     db_sess = db_session.create_session()
-    news = db_sess.query(News).all()
+    news = db_sess.query(Jobs).all()
     return render_template("index.html", news=news)
 
 
@@ -93,7 +108,7 @@ def add_news():
     form = NewsForm()
     if form.validate_on_submit():
         db_sess = db_session.create_session()
-        news = News()
+        news = Jobs()
         news.job = form.job.data
         news.work_size = form.work_size.data
         news.is_finished = form.is_finished.data
@@ -112,9 +127,9 @@ def edit_news(id):
     form = NewsForm()
     if request.method == "GET":
         db_sess = db_session.create_session()
-        news = db_sess.query(News).filter(
-            News.id == id,
-            News.user == current_user).first()
+        news = db_sess.query(Jobs).filter(
+            Jobs.id == id,
+            Jobs.user == current_user).first()
         if news:
             form.job.data = news.job
             form.work_size.data = news.work_size
@@ -124,8 +139,8 @@ def edit_news(id):
             abort(404)
     if form.validate_on_submit():
         db_sess = db_session.create_session()
-        news = db_sess.query(News).filter(News.id == id,
-                                          News.user == current_user
+        news = db_sess.query(Jobs).filter(Jobs.id == id,
+                                          Jobs.user == current_user
                                           ).first()
         if news:
             news.job = form.job.data
@@ -145,7 +160,7 @@ def edit_news(id):
 @login_required
 def news_delete(id):
     db_sess = db_session.create_session()
-    news = db_sess.query(News).filter(News.id == id).first()
+    news = db_sess.query(Jobs).filter(Jobs.id == id).first()
 
     if news:
         if news.user.id == current_user.id or current_user.id == 1:
